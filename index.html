@@ -8,12 +8,12 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-
     <style>
         body { font-family: 'Nunito', sans-serif; }
         h1, h2, h3, h4, h5, h6 { font-family: 'Fredoka', sans-serif; }
@@ -27,16 +27,20 @@
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,0.1); border-radius: 20px; }
-
-        /* Utilities */
-        .animate-fade-in-up { animation: fadeInUp 0.5s ease-out forwards; opacity: 0; transform: translateY(20px); }
-        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
         
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
 
-        /* Toggle Classes - Added !important to override Tailwind flex classes */
-        .hidden-section { display: none !important; }
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+
+        .modal-open { overflow: hidden; }
     </style>
 <script type="importmap">
 {
@@ -53,17 +57,17 @@
 
     <!-- HEADER -->
     <header id="main-header" class="fixed top-0 left-0 right-0 z-50 transition-all duration-500 flex justify-center pt-6 px-4">
-        <div id="header-container" class="relative w-full max-w-7xl mx-auto rounded-full px-6 py-4 bg-white/70 backdrop-blur-sm border border-white/20 shadow-sm transition-all duration-300 flex justify-between items-center gap-4">
+        <div id="header-container" class="relative w-full max-w-7xl mx-auto rounded-full px-6 py-4 backdrop-blur-sm border border-white/20 shadow-sm transition-all duration-300 flex justify-between items-center gap-4 bg-white/70">
             
             <!-- Logo -->
-            <a href="#" onclick="navigateTo('home')" class="flex items-center gap-2 group shrink-0 cursor-pointer">
+            <button onclick="router.navigate('home')" class="flex items-center gap-2 group shrink-0 cursor-pointer">
                 <div class="bg-[#581c87] text-white p-2 rounded-full transform group-hover:rotate-12 transition-transform">
                     <i data-lucide="ice-cream"></i>
                 </div>
                 <span class="font-bold text-xl tracking-tight text-[#581c87] hidden sm:inline">
                     Açaí<span class="text-[#db2777]">&</span>Sorvete
                 </span>
-            </a>
+            </button>
 
             <!-- Search Desktop -->
             <div class="flex-1 max-w-md mx-auto hidden md:block">
@@ -71,28 +75,33 @@
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <i data-lucide="search" class="text-gray-400 w-4 h-4"></i>
                     </div>
-                    <input type="text" id="desktop-search" placeholder="Buscar sabores..." class="block w-full pl-10 pr-3 py-2 border border-purple-100 rounded-full leading-5 bg-purple-50/50 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#db2777] transition-all sm:text-sm">
+                    <input 
+                        type="text" 
+                        id="desktop-search"
+                        placeholder="Buscar..."
+                        oninput="app.handleSearch(this.value)"
+                        class="block w-full pl-10 pr-3 py-2 border border-purple-100 rounded-full leading-5 bg-purple-50/50 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#db2777] transition-all sm:text-sm" 
+                    />
                 </div>
             </div>
 
             <!-- Desktop Nav -->
             <nav class="hidden lg:flex items-center gap-1 shrink-0">
-                <a href="#" onclick="navigateTo('home')" class="px-4 py-2 rounded-full text-sm font-bold text-[#581c87]/80 hover:text-[#581c87] hover:bg-[#db2777]/10 transition-all">Início</a>
-                <a href="#sabores" onclick="navigateToSection('sabores')" class="px-4 py-2 rounded-full text-sm font-bold text-[#581c87]/80 hover:text-[#581c87] hover:bg-[#db2777]/10 transition-all">Destaques</a>
-                <a href="#" onclick="openAboutModal()" class="px-4 py-2 rounded-full text-sm font-bold text-[#581c87]/80 hover:text-[#581c87] hover:bg-[#db2777]/10 transition-all">Sobre</a>
-                <a href="#" onclick="navigateTo('menu')" class="px-4 py-2 rounded-full text-sm font-bold text-[#581c87]/80 hover:text-[#581c87] hover:bg-[#db2777]/10 transition-all">Cardápio</a>
+                <button onclick="router.navigate('home')" class="nav-btn px-4 py-2 rounded-full text-sm font-bold transition-all text-[#581c87]/80 hover:text-[#581c87]" data-target="home">Início</button>
+                <button onclick="router.scrollTo('sabores')" class="px-4 py-2 rounded-full text-sm font-bold text-[#581c87]/80 hover:text-[#581c87] hover:bg-[#db2777]/10 transition-all">Destaques</button>
+                <button onclick="router.navigate('menu')" class="nav-btn px-4 py-2 rounded-full text-sm font-bold transition-all text-[#581c87]/80 hover:text-[#581c87]" data-target="menu">Cardápio</button>
             </nav>
 
             <!-- Cart Button -->
             <div class="flex items-center gap-4 shrink-0">
-                <button onclick="toggleCart()" class="relative bg-[#db2777] hover:bg-[#be185d] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all transform hover:scale-105 shadow-md flex items-center gap-2">
+                <button onclick="cart.toggle()" class="relative bg-[#db2777] hover:bg-[#be185d] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all transform hover:scale-105 shadow-md flex items-center gap-2">
                     <i data-lucide="shopping-bag" class="w-4 h-4"></i>
                     <span class="hidden lg:inline">Meu Pedido</span>
-                    <span id="cart-count" class="absolute -top-1 -right-1 bg-[#581c87] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-sm hidden">0</span>
+                    <span id="cart-badge" class="absolute -top-1 -right-1 bg-[#581c87] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-sm hidden">0</span>
                 </button>
                 
                 <!-- Mobile Menu Button -->
-                <button onclick="toggleMobileMenu()" class="md:hidden text-[#581c87] p-1">
+                <button onclick="app.toggleMobileMenu()" class="md:hidden text-[#581c87] p-1">
                     <i data-lucide="menu"></i>
                 </button>
             </div>
@@ -100,21 +109,21 @@
     </header>
 
     <!-- MOBILE MENU OVERLAY -->
-    <div id="mobile-menu" class="fixed inset-0 z-40 bg-white/95 backdrop-blur-xl transition-transform duration-300 translate-x-full md:hidden flex flex-col items-center justify-center gap-8">
-        <button onclick="toggleMobileMenu()" class="absolute top-6 right-6 text-[#581c87]"><i data-lucide="x" class="w-8 h-8"></i></button>
-        <a href="#" onclick="navigateTo('home'); toggleMobileMenu()" class="text-2xl font-bold text-[#581c87]">Início</a>
-        <a href="#sabores" onclick="navigateToSection('sabores'); toggleMobileMenu()" class="text-2xl font-bold text-[#581c87]">Destaques</a>
-        <a href="#" onclick="openAboutModal(); toggleMobileMenu()" class="text-2xl font-bold text-[#581c87]">Sobre</a>
-        <a href="#" onclick="navigateTo('menu'); toggleMobileMenu()" class="text-2xl font-bold text-[#581c87]">Cardápio</a>
+    <div id="mobile-menu" class="fixed inset-0 z-50 bg-white/95 backdrop-blur-xl transition-transform duration-300 flex flex-col items-center justify-center gap-8 translate-x-full">
+        <button onclick="app.toggleMobileMenu()" class="absolute top-6 right-6 text-[#581c87]">
+            <i data-lucide="x" class="w-8 h-8"></i>
+        </button>
+        <button onclick="router.navigate('home'); app.toggleMobileMenu()" class="text-2xl font-bold text-[#581c87]">Início</button>
+        <button onclick="router.scrollTo('sabores'); app.toggleMobileMenu()" class="text-2xl font-bold text-[#581c87]">Destaques</button>
+        <button onclick="router.navigate('menu'); app.toggleMobileMenu()" class="text-2xl font-bold text-[#581c87]">Cardápio</button>
     </div>
 
-    <!-- MAIN CONTENT AREA -->
+    <!-- MAIN CONTENT -->
     <main id="main-content">
         
-        <!-- HOME VIEW -->
-        <div id="home-view">
-            
-            <!-- Hero Section -->
+        <!-- VIEW: HOME -->
+        <div id="home-view" class="animate-fade-in-up">
+            <!-- Hero -->
             <section id="home" class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
                 <div class="absolute top-0 right-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
                     <div class="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] bg-[#db2777]/10 rounded-full blur-3xl mix-blend-multiply"></div>
@@ -124,7 +133,11 @@
                     <div class="w-full lg:w-1/2 text-center lg:text-left z-10">
                         <div class="inline-flex items-center gap-2 bg-white border border-pink-100 px-4 py-2 rounded-full mb-8 shadow-sm">
                             <span class="flex text-[#F59E0B] gap-1">
-                                <i data-lucide="star" class="w-3 h-3 fill-[#F59E0B]"></i><i data-lucide="star" class="w-3 h-3 fill-[#F59E0B]"></i><i data-lucide="star" class="w-3 h-3 fill-[#F59E0B]"></i><i data-lucide="star" class="w-3 h-3 fill-[#F59E0B]"></i><i data-lucide="star" class="w-3 h-3 fill-[#F59E0B]"></i>
+                                <i data-lucide="star" class="w-3 h-3 fill-[#F59E0B]"></i>
+                                <i data-lucide="star" class="w-3 h-3 fill-[#F59E0B]"></i>
+                                <i data-lucide="star" class="w-3 h-3 fill-[#F59E0B]"></i>
+                                <i data-lucide="star" class="w-3 h-3 fill-[#F59E0B]"></i>
+                                <i data-lucide="star" class="w-3 h-3 fill-[#F59E0B]"></i>
                             </span>
                             <span class="text-sm font-bold text-[#581c87]">Votado o melhor da região</span>
                         </div>
@@ -134,14 +147,14 @@
                         <p class="text-lg text-slate-600 mb-10 leading-relaxed max-w-lg mx-auto lg:mx-0 font-medium">
                             Açaí orgânico batido na hora, cremosidade incomparável e frutas frescas cortadas no momento do seu pedido.
                         </p>
-                        <button onclick="navigateTo('menu')" class="bg-[#db2777] text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-[#be185d] transition-all shadow-lg flex items-center justify-center gap-2 mx-auto lg:mx-0">
+                        <button onclick="router.navigate('menu')" class="bg-[#db2777] text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-[#be185d] transition-all shadow-lg flex items-center justify-center gap-2 mx-auto lg:mx-0">
                             Ver Cardápio <i data-lucide="arrow-right"></i>
                         </button>
                     </div>
                     <div class="w-full lg:w-1/2 relative z-10">
                         <div class="relative aspect-square max-w-[550px] mx-auto">
                             <div class="absolute inset-0 bg-[#fbcfe8] rounded-[3rem] rotate-6 scale-95 opacity-50"></div>
-                            <img src="Açaí Bowl1.png" alt="Açaí Bowl" class="relative z-10 w-full h-full object-cover rounded-[2.5rem] shadow-2xl">
+                            <img src="https://images.unsplash.com/photo-1590301157890-4810ed352733?q=80&w=800" alt="Açaí Bowl" class="relative z-10 w-full h-full object-cover rounded-[2.5rem] shadow-2xl" />
                         </div>
                     </div>
                 </div>
@@ -151,20 +164,26 @@
             <section id="diferenciais" class="py-20">
                 <div class="container mx-auto px-6">
                     <div class="max-w-7xl mx-auto bg-white rounded-[3rem] shadow-xl p-8 md:p-16 border border-purple-50 text-center">
-                        <h2 class="text-3xl md:text-4xl font-bold text-[#581c87] mb-12">Por que somos diferentes?</h2>
+                        <h2 className="text-3xl md:text-4xl font-bold text-[#581c87] mb-12">Por que somos diferentes?</h2>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
                             <div class="flex flex-col items-center">
-                                <div class="bg-[#ecfccb] w-20 h-20 rounded-2xl flex items-center justify-center mb-6 text-[#65a30d]"><i data-lucide="leaf" class="w-8 h-8"></i></div>
+                                <div class="bg-[#ecfccb] w-20 h-20 rounded-2xl flex items-center justify-center mb-6 text-[#65a30d]">
+                                    <i data-lucide="leaf" class="w-8 h-8"></i>
+                                </div>
                                 <h3 class="text-xl font-bold text-[#581c87] mb-3">Puro & Natural</h3>
                                 <p class="text-slate-500">Frutas selecionadas manualmente. Sem conservantes.</p>
                             </div>
                             <div class="flex flex-col items-center">
-                                <div class="bg-[#fce7f3] w-20 h-20 rounded-2xl flex items-center justify-center mb-6 text-[#db2777]"><i data-lucide="award" class="w-8 h-8"></i></div>
+                                <div class="bg-[#fce7f3] w-20 h-20 rounded-2xl flex items-center justify-center mb-6 text-[#db2777]">
+                                    <i data-lucide="award" class="w-8 h-8"></i>
+                                </div>
                                 <h3 class="text-xl font-bold text-[#581c87] mb-3">Receita Original</h3>
-                                <p class="text-slate-500">Polpa direto do Pará. Textura perfeita.</p>
+                                <p class="text-slate-500">Polpa direta do Pará. Textura perfeita.</p>
                             </div>
                             <div class="flex flex-col items-center">
-                                <div class="bg-[#ffedd5] w-20 h-20 rounded-2xl flex items-center justify-center mb-6 text-[#ea580c]"><i data-lucide="truck" class="w-8 h-8"></i></div>
+                                <div class="bg-[#ffedd5] w-20 h-20 rounded-2xl flex items-center justify-center mb-6 text-[#ea580c]">
+                                    <i data-lucide="truck" class="w-8 h-8"></i>
+                                </div>
                                 <h3 class="text-xl font-bold text-[#581c87] mb-3">Entrega Flash</h3>
                                 <p class="text-slate-500">Chega geladinho em embalagens térmicas.</p>
                             </div>
@@ -173,7 +192,7 @@
                 </div>
             </section>
 
-            <!-- Flavors Preview -->
+            <!-- Highlights -->
             <section id="sabores" class="py-24 bg-[#faf5ff] relative overflow-hidden">
                 <div class="container mx-auto px-6 max-w-7xl">
                     <div class="flex flex-col md:flex-row justify-between items-end mb-12">
@@ -181,45 +200,51 @@
                             <span class="text-[#db2777] font-bold uppercase tracking-wider text-sm">Imperdível</span>
                             <h2 class="text-4xl md:text-5xl font-black text-[#581c87] mt-2">Destaques</h2>
                         </div>
-                        <button onclick="navigateTo('menu')" class="text-[#db2777] font-bold hover:underline mt-4 md:mt-0">Ver todos</button>
+                        <button onclick="router.navigate('menu')" class="text-[#db2777] font-bold hover:underline mt-4 md:mt-0">Ver todos</button>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8 gap-y-20 mt-20">
                         <!-- Card 1 -->
                         <div class="bg-white rounded-[2.5rem] p-6 pt-24 shadow-lg border border-purple-50 relative flex flex-col items-center text-center">
                             <div class="absolute -top-16 w-40 h-40 rounded-full border-4 border-white shadow-xl overflow-hidden">
-                                <img src="https://images.unsplash.com/photo-1590301157890-4810ed352733?q=80&w=600&auto=format&fit=crop" class="w-full h-full object-cover">
+                                <img src="https://images.unsplash.com/photo-1590301157890-4810ed352733?q=80&w=600&auto=format&fit=crop" class="w-full h-full object-cover" />
                             </div>
                             <span class="px-4 py-1 rounded-full text-xs font-bold uppercase bg-pink-50 text-[#db2777] mb-2">Bestseller</span>
                             <h3 class="text-2xl font-bold text-[#581c87] mb-2">Açaí Tropical</h3>
                             <p class="text-slate-500 text-sm mb-6">Açaí, leite condensado, morangos e granola.</p>
                             <div class="flex items-center justify-between w-full pt-4 border-t border-purple-50 mt-auto">
                                 <span class="text-xl font-black text-[#581c87]">R$ 22,00</span>
-                                <button onclick="addToCartDirect('Açaí Tropical', 22.00, 'https://images.unsplash.com/photo-1590301157890-4810ed352733?q=80&w=600')" class="w-10 h-10 rounded-full bg-[#581c87] text-white flex items-center justify-center hover:scale-110 transition-transform"><i data-lucide="plus"></i></button>
+                                <button onclick="cart.add({id: 'acai-tropical', name: 'Açaí Tropical', desc: 'Açaí, leite condensado, morangos e granola.', price: 22.00, image: 'https://images.unsplash.com/photo-1590301157890-4810ed352733?q=80&w=600'})" class="w-10 h-10 rounded-full bg-[#581c87] text-white flex items-center justify-center hover:scale-110 transition-transform">
+                                    <i data-lucide="plus"></i>
+                                </button>
                             </div>
                         </div>
                         <!-- Card 2 -->
                         <div class="bg-white rounded-[2.5rem] p-6 pt-24 shadow-lg border border-purple-50 relative flex flex-col items-center text-center">
                             <div class="absolute -top-16 w-40 h-40 rounded-full border-4 border-white shadow-xl overflow-hidden">
-                                <img src="Pistache gelo.png" class="w-full h-full object-cover">
+                                <img src="https://images.unsplash.com/photo-1559599528-2b83c5093df9?q=80&w=600" class="w-full h-full object-cover" />
                             </div>
                             <h3 class="text-2xl font-bold text-[#581c87] mb-2">Gelato Pistache</h3>
                             <p class="text-slate-500 text-sm mb-6">Cremoso, autêntico e cheio de pedaços.</p>
                             <div class="flex items-center justify-between w-full pt-4 border-t border-purple-50 mt-auto">
                                 <span class="text-xl font-black text-[#581c87]">R$ 16,00</span>
-                                <button onclick="addToCartDirect('Gelato Pistache', 16.00, 'https://images.unsplash.com/photo-1559599528-2b83c5093df9?q=80&w=600')" class="w-10 h-10 rounded-full bg-[#65a30d] text-white flex items-center justify-center hover:scale-110 transition-transform"><i data-lucide="plus"></i></button>
+                                <button onclick="cart.add({id: 'gelato-pistache', name: 'Gelato Pistache', desc: 'Cremoso, autêntico e cheio de pedaços.', price: 16.00, image: 'https://images.unsplash.com/photo-1559599528-2b83c5093df9?q=80&w=600'})" class="w-10 h-10 rounded-full bg-[#581c87] text-white flex items-center justify-center hover:scale-110 transition-transform">
+                                    <i data-lucide="plus"></i>
+                                </button>
                             </div>
                         </div>
                         <!-- Card 3 -->
                         <div class="bg-white rounded-[2.5rem] p-6 pt-24 shadow-lg border border-purple-50 relative flex flex-col items-center text-center">
                             <div class="absolute -top-16 w-40 h-40 rounded-full border-4 border-white shadow-xl overflow-hidden">
-                                <img src="Barca de Açaí Profissional.png" class="w-full h-full object-cover">
+                                <img src="https://images.unsplash.com/photo-1590301157890-4810ed352733?q=80&w=600" class="w-full h-full object-cover" />
                             </div>
                             <span class="px-4 py-1 rounded-full text-xs font-bold uppercase bg-pink-50 text-[#db2777] mb-2">Família</span>
                             <h3 class="text-2xl font-bold text-[#581c87] mb-2">Barca Gigante</h3>
                             <p class="text-slate-500 text-sm mb-6">1kg de açaí com 5 acompanhamentos.</p>
                             <div class="flex items-center justify-between w-full pt-4 border-t border-purple-50 mt-auto">
                                 <span class="text-xl font-black text-[#581c87]">R$ 45,00</span>
-                                <button onclick="addToCartDirect('Barca Gigante', 45.00, 'Açaí tradicional1.jpg')" class="w-10 h-10 rounded-full bg-[#581c87] text-white flex items-center justify-center hover:scale-110 transition-transform"><i data-lucide="plus"></i></button>
+                                <button onclick="cart.add({id: 'barca-gigante', name: 'Barca Gigante', desc: '1kg de açaí com 5 acompanhamentos.', price: 45.00, image: 'https://images.unsplash.com/photo-1590301157890-4810ed352733?q=80&w=600'})" class="w-10 h-10 rounded-full bg-[#581c87] text-white flex items-center justify-center hover:scale-110 transition-transform">
+                                    <i data-lucide="plus"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -230,7 +255,9 @@
             <section class="py-24 bg-white">
                 <div class="container mx-auto px-6 max-w-7xl grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                     <div class="order-2 lg:order-1">
-                        <div class="inline-block bg-[#FCE7F3] p-3 rounded-2xl mb-6 rotate-3 text-[#DB2777]"><i data-lucide="camera" class="w-8 h-8"></i></div>
+                        <div class="inline-block bg-[#FCE7F3] p-3 rounded-2xl mb-6 rotate-3 text-[#DB2777]">
+                            <i data-lucide="camera" class="w-8 h-8"></i>
+                        </div>
                         <h2 class="text-4xl md:text-5xl font-black text-[#4C1D95] mb-6">Momentos que pedem bis</h2>
                         <p class="text-lg text-slate-600 mb-8">Nossa loja foi pensada para ser o cenário perfeito das suas fotos. Cores vibrantes e sabores surreais.</p>
                         <a href="#" class="inline-flex items-center gap-3 bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#FCB045] text-white px-8 py-4 rounded-full font-bold shadow-lg hover:-translate-y-1 transition-transform">
@@ -239,12 +266,11 @@
                     </div>
                     <div class="order-1 lg:order-2 grid grid-cols-2 gap-4">
                         <div class="space-y-4 translate-y-8">
-                            <img src="" class="w-full rounded-3xl shadow-lg">
-                            <img src="https://images.unsplash.com/photo-1501443762994-82bd5dace89a?q=80&w=400&auto=format&fit=crop" class="w-full rounded-3xl shadow-lg">
+                            <img src="https://images.unsplash.com/photo-1501443762994-82bd5dace89a?q=80&w=400&auto=format&fit=crop" class="w-full rounded-3xl shadow-lg" alt="Ice cream texture" />
                         </div>
                         <div class="space-y-4">
-                            <img src="https://images.unsplash.com/photo-1563805042-7684c019e1cb?q=80&w=400&auto=format&fit=crop" class="w-full rounded-3xl shadow-lg">
-                            <img src="https://images.unsplash.com/photo-1560008581-09826d1de69e?q=80&w=400&auto=format&fit=crop" class="w-full rounded-3xl shadow-lg">
+                            <img src="https://images.unsplash.com/photo-1563805042-7684c019e1cb?q=80&w=400&auto=format&fit=crop" class="w-full rounded-3xl shadow-lg" alt="Ice cream" />
+                            <img src="https://images.unsplash.com/photo-1560008581-09826d1de69e?q=80&w=400&auto=format&fit=crop" class="w-full rounded-3xl shadow-lg" alt="Fruit bowl" />
                         </div>
                     </div>
                 </div>
@@ -266,38 +292,42 @@
                         <h2 class="text-4xl font-bold mb-8">Venha nos visitar</h2>
                         <div class="space-y-6">
                             <div class="flex gap-4">
-                                <div class="w-12 h-12 bg-[#222] rounded-xl flex items-center justify-center shrink-0"><i data-lucide="map-pin"></i></div>
+                                <div class="w-12 h-12 bg-[#222] rounded-xl flex items-center justify-center shrink-0">
+                                    <i data-lucide="map-pin"></i>
+                                </div>
                                 <div><h3 class="font-bold text-lg">Endereço</h3><p class="text-gray-400">Av. João Gomes Cardoso, 374 - Contagem, MG</p></div>
                             </div>
                             <div class="flex gap-4">
-                                <div class="w-12 h-12 bg-[#222] rounded-xl flex items-center justify-center shrink-0"><i data-lucide="clock"></i></div>
+                                <div class="w-12 h-12 bg-[#222] rounded-xl flex items-center justify-center shrink-0">
+                                    <i data-lucide="clock"></i>
+                                </div>
                                 <div><h3 class="font-bold text-lg">Horário</h3><p class="text-gray-400">Ter a Dom: 14h às 23h</p></div>
                             </div>
                         </div>
-                        <a href="https://maps.google.com" target="_blank" class="block w-full bg-white text-black font-bold text-center py-4 rounded-xl hover:bg-gray-200 transition-all">Abrir no Maps</a>
+                        <a href="https://maps.google.com" target="_blank" rel="noreferrer" class="block w-full bg-white text-black font-bold text-center py-4 rounded-xl hover:bg-gray-200 transition-all">Abrir no Maps</a>
                     </div>
                     <div class="w-full lg:w-1/2 h-[400px] bg-[#222] rounded-3xl p-2">
-                        <iframe width="100%" height="100%" frameBorder="0" style="border:0; border-radius: 1rem;" src="https://maps.google.com/maps?width=100%25&amp;height=600&amp;hl=pt-BR&amp;q=Av.+Jo%C3%A3o%20Gomes%20Cardoso,%20374%20-%20Jardim%20Laguna,%20Contagem%20-%20MG&amp;t=&amp;z=15&amp;ie=UTF8&amp;iwloc=B&amp;output=embed"></iframe>
+                        <iframe 
+                            width="100%" 
+                            height="100%" 
+                            frameBorder="0" 
+                            style="border: 0; border-radius: 1rem"
+                            src="https://maps.google.com/maps?width=100%25&amp;height=600&amp;hl=pt-BR&amp;q=Av.+Jo%C3%A3o%20Gomes%20Cardoso,%20374%20-%20Jardim%20Laguna,%20Contagem%20-%20MG&amp;t=&amp;z=15&amp;ie=UTF8&amp;iwloc=B&amp;output=embed"
+                            title="Map"
+                        ></iframe>
                     </div>
                 </div>
             </section>
         </div>
 
-        <!-- MENU VIEW (Hidden by default) -->
-        <div id="menu-view" class="hidden-section pt-32 pb-20 container mx-auto px-4 md:px-6 min-h-screen">
+        <!-- VIEW: MENU -->
+        <div id="menu-view" class="pt-32 pb-20 container mx-auto px-4 md:px-6 min-h-screen hidden">
             <div class="text-center mb-16">
                 <span class="text-[#db2777] font-bold uppercase tracking-wider text-sm">Cardápio Completo</span>
                 <h1 class="text-4xl md:text-6xl font-black text-[#581c87] mt-2 mb-6">Explore Nossos Sabores</h1>
-                
-                <!-- Search In Menu -->
-                <div class="max-w-md mx-auto relative mt-6">
-                    <input type="text" id="menu-search" oninput="filterMenu()" placeholder="Filtrar por nome..." class="w-full pl-10 pr-4 py-3 rounded-xl border border-purple-200 focus:outline-none focus:ring-2 focus:ring-[#db2777]">
-                    <i data-lucide="search" class="absolute left-3 top-3.5 text-gray-400 w-5 h-5"></i>
-                </div>
             </div>
-
             <div id="menu-container" class="max-w-6xl mx-auto space-y-16">
-                <!-- Menu categories injected via JS -->
+                <!-- Dynamically populated -->
             </div>
         </div>
 
@@ -309,20 +339,26 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
                 <div>
                     <div class="flex items-center gap-2 mb-6">
-                        <div class="bg-[#581c87] text-white p-2 rounded-lg"><i data-lucide="ice-cream" class="w-5 h-5"></i></div>
+                        <div class="bg-[#581c87] text-white p-2 rounded-lg">
+                            <i data-lucide="ice-cream" class="w-5 h-5"></i>
+                        </div>
                         <span class="font-bold text-xl tracking-tight text-[#581c87]">Açaí<span class="text-[#db2777]">&</span>Sorvete</span>
                     </div>
                     <p class="text-slate-500 mb-6 text-sm">Transformando açaí em experiência desde 2015.</p>
                     <div class="flex gap-4">
-                        <a href="#" class="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-[#581c87] hover:bg-[#db2777] hover:text-white transition-all"><i data-lucide="instagram" class="w-4 h-4"></i></a>
-                        <a href="#" class="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-[#581c87] hover:bg-[#db2777] hover:text-white transition-all"><i data-lucide="facebook" class="w-4 h-4"></i></a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-[#581c87] hover:bg-[#db2777] hover:text-white transition-all">
+                            <i data-lucide="instagram" class="w-4 h-4"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-[#581c87] hover:bg-[#db2777] hover:text-white transition-all">
+                            <i data-lucide="facebook" class="w-4 h-4"></i>
+                        </a>
                     </div>
                 </div>
                 <div>
                     <h4 class="font-bold text-[#581c87] mb-6">Explorar</h4>
                     <ul class="space-y-3 text-slate-500 text-sm">
-                        <li><a href="#" onclick="navigateTo('menu')" class="hover:text-[#db2777]">Nosso Menu</a></li>
-                        <li><button onclick="openAboutModal()" class="hover:text-[#db2777]">Sobre a Marca</button></li>
+                        <li><a href="#" class="hover:text-[#db2777]">Nosso Menu</a></li>
+                        <li><a href="#" class="hover:text-[#db2777]">Sobre a Marca</a></li>
                     </ul>
                 </div>
                 <div>
@@ -348,41 +384,41 @@
     </footer>
 
     <!-- CART DRAWER -->
-    <div id="cart-overlay" onclick="toggleCart()" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] transition-opacity duration-300 opacity-0 pointer-events-none"></div>
-    <div id="cart-drawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-white z-[70] shadow-2xl transform transition-transform duration-500 translate-x-full flex flex-col">
+    <div id="cart-drawer-backdrop" onclick="cart.toggle()" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] transition-opacity duration-300 opacity-0 pointer-events-none"></div>
+    <div id="cart-drawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-white z-[70] shadow-2xl transform transition-transform duration-500 flex flex-col translate-x-full">
         <div class="p-6 border-b border-purple-100 flex items-center justify-between bg-[#faf5ff] shrink-0">
             <div class="flex items-center gap-3">
-                <div class="bg-[#581c87] text-white p-2 rounded-xl shadow-lg"><i data-lucide="shopping-bag" class="w-5 h-5"></i></div>
+                <div class="bg-[#581c87] text-white p-2 rounded-xl shadow-lg">
+                    <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+                </div>
                 <h2 class="text-xl font-black text-[#581c87]">Seu Carrinho</h2>
             </div>
-            <button onclick="toggleCart()" class="p-2 hover:bg-slate-100 rounded-full text-slate-500 transition-colors"><i data-lucide="x"></i></button>
+            <button onclick="cart.toggle()" class="p-2 hover:bg-slate-100 rounded-full text-slate-500 transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
         </div>
         
-        <div id="cart-items-container" class="flex-1 overflow-y-auto p-6 custom-scrollbar space-y-6">
-            <!-- Items injected via JS -->
-            <div class="h-full flex flex-col items-center justify-center text-center opacity-60">
-                <i data-lucide="shopping-bag" class="w-12 h-12 text-slate-400 mb-4"></i>
-                <h3 class="text-xl font-bold text-slate-700">Carrinho vazio</h3>
-                <p class="text-slate-500">Adicione itens para começar.</p>
-            </div>
+        <div id="cart-items" class="flex-1 overflow-y-auto p-6 custom-scrollbar space-y-6">
+            <!-- Dynamic Cart Items -->
         </div>
 
         <div id="cart-footer" class="p-6 border-t border-purple-100 bg-white shrink-0 hidden">
-            <!-- Checkout Form -->
             <div class="mb-4 space-y-3 bg-[#faf5ff] p-4 rounded-xl border border-purple-100">
-                <div class="flex items-center gap-2 mb-1 text-[#581c87] font-bold text-sm"><i data-lucide="user" class="w-4 h-4"></i> Dados de Entrega</div>
-                <input type="text" id="cust-name" placeholder="Seu Nome" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-[#db2777]">
-                <input type="tel" id="cust-phone" placeholder="Telefone" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-[#db2777]">
-                <input type="text" id="cust-address" placeholder="Endereço Completo" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-[#db2777]">
+                <div class="flex items-center gap-2 mb-1 text-[#581c87] font-bold text-sm">
+                    <i data-lucide="user" class="w-4 h-4"></i> Dados de Entrega
+                </div>
+                <input type="text" id="cust-name" placeholder="Seu Nome" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-[#db2777]" />
+                <input type="tel" id="cust-phone" placeholder="Telefone" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-[#db2777]" />
+                <input type="text" id="cust-address" placeholder="Endereço Completo" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-[#db2777]" />
                 
                 <div class="pt-2">
-                     <div class="text-xs font-bold text-[#581c87] mb-2">Pagamento</div>
-                     <select id="cust-payment" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm bg-white">
-                         <option value="Pix">Pix</option>
-                         <option value="Dinheiro">Dinheiro</option>
-                         <option value="Cartão Crédito">Cartão Crédito</option>
-                         <option value="Cartão Débito">Cartão Débito</option>
-                     </select>
+                    <div class="text-xs font-bold text-[#581c87] mb-2">Pagamento</div>
+                    <select id="cust-payment" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm bg-white">
+                        <option value="Pix">Pix</option>
+                        <option value="Dinheiro">Dinheiro</option>
+                        <option value="Cartão Crédito">Cartão Crédito</option>
+                        <option value="Cartão Débito">Cartão Débito</option>
+                    </select>
                 </div>
             </div>
 
@@ -390,524 +426,533 @@
                 <span class="text-slate-500 font-medium">Total</span>
                 <span id="cart-total" class="text-2xl font-black text-[#581c87]">R$ 0,00</span>
             </div>
-            <button onclick="checkoutWhatsApp()" class="w-full bg-[#25D366] hover:bg-[#1DA851] text-white py-4 rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-2 transition-all">
+            <button onclick="cart.checkout()" class="w-full bg-[#25D366] hover:bg-[#1DA851] text-white py-4 rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-2 transition-all">
                 Finalizar no WhatsApp <i data-lucide="arrow-right" class="w-5 h-5"></i>
             </button>
         </div>
     </div>
 
     <!-- PRODUCT MODAL -->
-    <div id="product-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 hidden-section">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeProductModal()"></div>
-        <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl relative z-10 flex flex-col max-h-[90vh] overflow-hidden animate-fade-in-up">
-            <!-- Modal Header -->
-            <div class="relative h-40 shrink-0">
-                <img id="modal-img" src="" class="w-full h-full object-cover">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-6">
-                    <h2 id="modal-title" class="text-3xl font-black text-white">Nome do Produto</h2>
-                </div>
-                <button onclick="closeProductModal()" class="absolute top-4 right-4 bg-white/20 text-white p-2 rounded-full hover:bg-white hover:text-red-500"><i data-lucide="x"></i></button>
-            </div>
-            
-            <!-- Modal Body -->
-            <div class="overflow-y-auto p-6 space-y-6 custom-scrollbar" id="modal-body">
-                <!-- 1. Size -->
-                <div>
-                    <h3 class="font-bold text-[#581c87] mb-3">1. Escolha o Tamanho</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="size-options">
-                        <!-- JS generated -->
-                    </div>
-                </div>
-                
-                <!-- 2. Flavor (Conditional) -->
-                <div id="flavor-section" class="hidden-section">
-                    <h3 class="font-bold text-[#581c87] mb-3">2. Escolha o Sabor</h3>
-                    <div class="grid grid-cols-2 gap-3" id="flavor-options">
-                         <!-- JS generated -->
-                    </div>
-                </div>
-
-                <!-- 3. Toppings -->
-                <div>
-                    <div class="flex justify-between items-end mb-3">
-                        <h3 class="font-bold text-[#581c87]">Complementos</h3>
-                        <span class="text-xs font-bold text-orange-500">3 Grátis (+ R$ 4,50 extra)</span>
-                    </div>
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3" id="topping-options">
-                        <!-- JS generated -->
-                    </div>
-                </div>
-
-                <!-- 4. Observations -->
-                <div>
-                    <h3 class="font-bold text-[#581c87] mb-3">Observações</h3>
-                    <textarea id="modal-obs" placeholder="Ex: Sem calda..." class="w-full border border-slate-300 rounded-xl p-3 h-20 resize-none focus:ring-2 focus:ring-[#db2777] outline-none"></textarea>
-                </div>
-            </div>
-
-            <!-- Modal Footer -->
-            <div class="p-6 border-t border-slate-100 bg-[#faf5ff] flex items-center justify-between shrink-0">
-                <div class="flex flex-col">
-                    <span class="text-slate-500 text-sm">Total</span>
-                    <span id="modal-total" class="text-2xl font-black text-[#581c87]">R$ 0,00</span>
-                </div>
-                <button onclick="confirmCustomization()" class="px-8 py-3 rounded-full font-bold text-white bg-[#db2777] hover:bg-[#be185d] flex items-center gap-2 shadow-lg">
-                    Adicionar <i data-lucide="plus"></i>
-                </button>
-            </div>
+    <div id="product-modal-backdrop" onclick="modal.close()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] hidden"></div>
+    <div id="product-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 pointer-events-none opacity-0 transition-opacity duration-300">
+        <div id="product-modal-content" class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl relative z-10 flex flex-col max-h-[90vh] overflow-hidden transform scale-95 transition-transform duration-300 pointer-events-auto">
+             <!-- Dynamically filled -->
         </div>
     </div>
 
-    <!-- ABOUT MODAL -->
-    <div id="about-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 hidden-section">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeAboutModal()"></div>
-        <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl relative z-10 overflow-hidden animate-fade-in-up flex flex-col max-h-[90vh]">
-            <div class="relative h-48 shrink-0">
-                <img src="https://images.unsplash.com/photo-1501443762994-82bd5dace89a?q=80&w=2574&auto=format&fit=crop" class="w-full h-full object-cover">
-                <div class="absolute inset-0 bg-gradient-to-t from-[#581c87] to-transparent flex items-end p-8">
-                    <h2 class="text-3xl font-black text-white">Tradição & Sabor Real</h2>
-                </div>
-                <button onclick="closeAboutModal()" class="absolute top-4 right-4 bg-white/20 text-white p-2 rounded-full hover:bg-white hover:text-[#db2777]"><i data-lucide="x"></i></button>
-            </div>
-            <div class="p-8 overflow-y-auto custom-scrollbar bg-[#faf5ff] text-slate-600 space-y-4">
-                <p>A <strong>Açaí & Sorveteria</strong> nasceu do desejo de trazer o verdadeiro sabor da fruta para a nossa região. Cansados de produtos industrializados, decidimos fazer diferente: <strong>aqui, a cremosidade é lei.</strong></p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-4">
-                    <div class="bg-white p-4 rounded-xl shadow-sm"><h4 class="font-bold text-[#581c87]">Qualidade Artesanal</h4><p class="text-sm">Sorvetes batidos diariamente.</p></div>
-                    <div class="bg-white p-4 rounded-xl shadow-sm"><h4 class="font-bold text-[#581c87]">Açaí Puro</h4><p class="text-sm">Polpa direta do produtor.</p></div>
-                </div>
-                <p>Venha nos visitar e criar memórias saborosas!</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- JAVASCRIPT LOGIC -->
     <script>
         // --- DATA ---
+        const PLACEHOLDER_ACAI = "https://images.unsplash.com/photo-1590301157890-4810ed352733?q=80&w=600&auto=format&fit=crop";
+        const PLACEHOLDER_SORVETE = "https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?q=80&w=600";
+        
         const menuCategories = [
             {
-                id: 'monte-seu-jeito', title: 'Monte do Seu Jeito', isCustom: true, icon: 'edit-3', color: 'orange',
+                id: 'monte-seu-jeito', 
+                title: 'Monte do Seu Jeito', 
+                isCustom: true, 
+                icon: 'edit-3', 
+                color: 'orange',
                 items: [
-                    { id: 'monte-acai', name: "Monte o Seu Açaí", desc: "Escolha o tamanho e adicione seus complementos.", price: 0, image: "Copo Açaí.jpg", type: 'acai' },
-                    { id: 'monte-sorvete', name: "Monte o seu Sorvete", desc: "Escolha tamanho e sabor.", price: 0, image: "https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?q=80&w=600", type: 'sorvete' }
+                    { id: 'monte-acai', name: "Monte o Seu Açaí", desc: "Escolha o tamanho e adicione seus complementos.", price: 0, image: PLACEHOLDER_ACAI, type: 'acai' },
+                    { id: 'monte-sorvete', name: "Monte o seu Sorvete", desc: "Escolha tamanho e sabor.", price: 0, image: PLACEHOLDER_SORVETE, type: 'sorvete' }
                 ]
             },
             {
-                id: 'ofertas', title: 'Ofertas do Dia', icon: 'percent', color: 'pink',
+                id: 'ofertas', 
+                title: 'Ofertas do Dia', 
+                icon: 'percent', 
+                color: 'pink',
                 items: [
-                    { id: 'combo-casal', name: "Combo Casal (2x 500ml)", desc: "Dois açaís completos.", price: 42.00, image: "https://images.unsplash.com/photo-1590301157890-4810ed352733?q=80&w=600" },
-                    { id: 'trio-alegria', name: "Trio da Alegria", desc: "3 Copos da Felicidade.", price: 55.00, image: "https://images.unsplash.com/photo-1563805042-7684c019e1cb?q=80&w=600" }
+                    { id: 'combo-casal', name: "Combo Casal (2x 500ml)", desc: "Dois açaís completos.", price: 42.00, image: PLACEHOLDER_ACAI },
+                    { id: 'trio-alegria', name: "Trio da Alegria", desc: "3 Copos da Felicidade.", price: 55.00, image: PLACEHOLDER_ACAI }
                 ]
             },
             {
-                id: 'acai', title: 'Açaí', icon: 'flame', color: 'purple',
+                id: 'acai', 
+                title: 'Açaí', 
+                icon: 'flame', 
+                color: 'purple',
                 items: [
-                    { id: 'acai-trad', name: "Açaí Tradicional", desc: "Açaí puro batido na hora.", price: 18.00, image: "Açaí tradicional1.jpg" },
-                    { id: 'acai-trop', name: "Açaí Tropical", desc: "Com morango e kiwi.", price: 22.00, image: "https://images.unsplash.com/photo-1590301157890-4810ed352733?q=80&w=600" },
-                    { id: 'copo-felicidade', name: "Copo da Felicidade", desc: "Camadas de açaí e ninho.", price: 25.00, image: "https://images.unsplash.com/photo-1563805042-7684c019e1cb?q=80&w=600" }
+                    { id: 'acai-trad', name: "Açaí Tradicional", desc: "Açaí puro batido na hora.", price: 18.00, image: "https://images.unsplash.com/photo-1490885578174-acda8905c2c6?q=80&w=600&auto=format&fit=crop" },
+                    { id: 'acai-trop', name: "Açaí Tropical", desc: "Com morango e kiwi.", price: 22.00, image: PLACEHOLDER_ACAI },
+                    { id: 'copo-felicidade', name: "Copo da Felicidade", desc: "Camadas de açaí e ninho.", price: 25.00, image: "https://images.unsplash.com/photo-1628926360408-164b732d432b?q=80&w=600&auto=format&fit=crop" },
+                    { id: 'acai-nutella', name: "Açaí Nutellove", desc: "Para quem ama Nutella e Leite Ninho.", price: 26.00, image: "https://images.unsplash.com/photo-1590301157890-4810ed352733?q=80&w=600&auto=format&fit=crop" },
+                    { id: 'acai-fit', name: "Açaí Fit Zero", desc: "Zero açúcar, adoçado com Stévia.", price: 24.00, image: "https://images.unsplash.com/photo-1618854446401-496333917a1a?q=80&w=600" },
+                    { id: 'acai-banana', name: "Açaí com Banana", desc: "O clássico com rodelas de banana e granola.", price: 20.00, image: "https://images.unsplash.com/photo-1615486242377-6d6c353995eb?q=80&w=600" }
                 ]
             },
             {
-                id: 'sorvetes', title: 'Sorvetes Artesanais', icon: 'snowflake', color: 'blue',
+                id: 'sorvetes', 
+                title: 'Sorvetes Artesanais', 
+                icon: 'snowflake', 
+                color: 'blue',
                 items: [
-                    { id: 'gelato-pistache', name: "Gelato Pistache", desc: "Pistache italiano autêntico.", price: 16.00, image: "Pistache gelo.png" },
-                    { id: 'choc-belga', name: "Chocolate Belga", desc: "Intenso e cremoso.", price: 14.00, image: "https://images.unsplash.com/photo-1580915411954-282cb1b0d780?q=80&w=600" }
+                    { id: 'gelato-pistache', name: "Gelato Pistache", desc: "Pistache italiano autêntico.", price: 16.00, image: "https://images.unsplash.com/photo-1559599528-2b83c5093df9?q=80&w=600" },
+                    { id: 'choc-belga', name: "Chocolate Belga", desc: "Intenso e cremoso.", price: 14.00, image: "https://images.unsplash.com/photo-1580915411954-282cb1b0d780?q=80&w=600" },
+                    { id: 'sorvete-flocos', name: "Flocos Clássico", desc: "Creme de nata com pedaços de chocolate.", price: 14.00, image: "https://images.unsplash.com/photo-1563805042-7684c019e1cb?q=80&w=600" },
+                    { id: 'sorvete-ninho', name: "Ninho Trufado", desc: "Sabor leite ninho com trufa de avelã.", price: 15.00, image: "https://images.unsplash.com/photo-1501443762994-82bd5dace89a?q=80&w=600" },
+                    { id: 'sorvete-morango', name: "Morango ao Leite", desc: "Feito com pedaços da fruta.", price: 14.00, image: "https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?q=80&w=600" },
+                    { id: 'sorvete-napolitano', name: "Napolitano", desc: "O trio perfeito: morango, creme e chocolate.", price: 13.00, image: "https://images.unsplash.com/photo-1560008581-09826d1de69e?q=80&w=600" }
                 ]
             }
         ];
 
-        // --- STATE ---
-        let cart = [];
-        let currentModalProduct = null;
-        let customization = { size: '', flavor: '', toppings: [], obs: '' };
-
-        // --- NAVIGATION ---
-        function navigateTo(viewId) {
-            const homeView = document.getElementById('home-view');
-            const menuView = document.getElementById('menu-view');
-            const searchInput = document.getElementById('desktop-search');
-
-            if (viewId === 'home') {
-                homeView.classList.remove('hidden-section');
-                menuView.classList.add('hidden-section');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                searchInput.placeholder = "Buscar sabores...";
-            } else if (viewId === 'menu') {
-                homeView.classList.add('hidden-section');
-                menuView.classList.remove('hidden-section');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                renderMenu();
-                searchInput.placeholder = "Filtrar cardápio...";
-            }
-        }
-
-        function navigateToSection(sectionId) {
-            navigateTo('home');
-            setTimeout(() => {
-                document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
-            }, 100);
-        }
-
-        function toggleMobileMenu() {
-            const menu = document.getElementById('mobile-menu');
-            if (menu.classList.contains('translate-x-full')) {
-                menu.classList.remove('translate-x-full');
-            } else {
-                menu.classList.add('translate-x-full');
-            }
-        }
-
-        // --- MENU RENDERING ---
-        function renderMenu(filter = '') {
-            const container = document.getElementById('menu-container');
-            container.innerHTML = '';
-            
-            const lowerFilter = filter.toLowerCase();
-
-            menuCategories.forEach(cat => {
-                const filteredItems = cat.items.filter(item => 
-                    item.name.toLowerCase().includes(lowerFilter) || 
-                    item.desc.toLowerCase().includes(lowerFilter)
-                );
-
-                if (filteredItems.length > 0) {
-                    const catDiv = document.createElement('div');
-                    catDiv.innerHTML = `
-                        <div class="flex items-center gap-3 mb-6 border-b border-purple-200 pb-2">
-                            <i data-lucide="${cat.icon}" class="text-[#581c87]"></i>
-                            <h2 class="text-2xl font-bold text-[#581c87]">${cat.title}</h2>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            ${filteredItems.map(item => `
-                                <div class="bg-white p-4 rounded-3xl shadow-sm hover:shadow-lg transition-all border border-purple-50 flex gap-4 items-center ${cat.isCustom ? 'bg-orange-50 border-orange-100' : ''}">
-                                    <img src="${item.image}" class="w-24 h-24 rounded-xl object-cover shrink-0">
-                                    <div class="flex-1">
-                                        <h3 class="font-bold text-[#581c87] leading-tight mb-1">${item.name}</h3>
-                                        <p class="text-slate-500 text-xs mb-2 line-clamp-2">${item.desc}</p>
-                                        <div class="flex justify-between items-center mt-2">
-                                            <span class="font-black text-[#db2777]">${item.price > 0 ? formatPrice(item.price) : 'A partir R$ 15'}</span>
-                                            <button onclick="${cat.isCustom ? `openProductModal('${item.id}')` : `addToCartDirect('${item.name}', ${item.price}, '${item.image}')`}" class="w-8 h-8 rounded-full ${cat.isCustom ? 'bg-orange-500' : 'bg-[#581c87]'} text-white flex items-center justify-center hover:scale-105">
-                                                <i data-lucide="${cat.isCustom ? 'edit-3' : 'plus'}" class="w-4 h-4"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    `;
-                    container.appendChild(catDiv);
-                }
-            });
-            lucide.createIcons();
-        }
-
-        function filterMenu() {
-            const term = document.getElementById('menu-search').value;
-            renderMenu(term);
-        }
-
-        // --- CART LOGIC ---
-        function formatPrice(val) {
-            return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        }
-
-        function toggleCart() {
-            const overlay = document.getElementById('cart-overlay');
-            const drawer = document.getElementById('cart-drawer');
-            
-            if (drawer.classList.contains('translate-x-full')) {
-                drawer.classList.remove('translate-x-full');
-                overlay.classList.remove('opacity-0', 'pointer-events-none');
-            } else {
-                drawer.classList.add('translate-x-full');
-                overlay.classList.add('opacity-0', 'pointer-events-none');
-            }
-        }
-
-        function addToCartDirect(name, price, image) {
-            const id = name.toLowerCase().replace(/\s+/g, '-');
-            const existing = cart.find(i => i.id === id);
-            
-            if (existing) {
-                existing.quantity++;
-            } else {
-                cart.push({ id, name, price, image, quantity: 1, details: '', customerNote: '' });
-            }
-            updateCartUI();
-            toggleCart();
-        }
-
-        function addToCartCustom(item) {
-            cart.push({
-                id: item.name + Date.now(),
-                name: item.name,
-                price: item.price,
-                image: item.image,
-                quantity: 1,
-                details: item.details,
-                customerNote: ''
-            });
-            updateCartUI();
-            toggleCart();
-        }
-
-        function removeFromCart(id) {
-            cart = cart.filter(i => i.id !== id);
-            updateCartUI();
-        }
-
-        function updateQuantity(id, delta) {
-            const item = cart.find(i => i.id === id);
-            if (item) {
-                item.quantity += delta;
-                if (item.quantity <= 0) removeFromCart(id);
-                else updateCartUI();
-            }
-        }
-
-        function updateNote(id, note) {
-            const item = cart.find(i => i.id === id);
-            if (item) item.customerNote = note;
-        }
-
-        function updateCartUI() {
-            const container = document.getElementById('cart-items-container');
-            const footer = document.getElementById('cart-footer');
-            const countBadge = document.getElementById('cart-count');
-            const totalEl = document.getElementById('cart-total');
-
-            // Badge
-            const totalQty = cart.reduce((acc, i) => acc + i.quantity, 0);
-            countBadge.innerText = totalQty;
-            countBadge.classList.toggle('hidden', totalQty === 0);
-
-            // Items
-            if (cart.length === 0) {
-                container.innerHTML = `
-                    <div class="h-full flex flex-col items-center justify-center text-center opacity-60">
-                        <i data-lucide="shopping-bag" class="w-12 h-12 text-slate-400 mb-4"></i>
-                        <h3 class="text-xl font-bold text-slate-700">Carrinho vazio</h3>
-                        <p class="text-slate-500">Adicione deliciosos açaís.</p>
-                    </div>`;
-                footer.classList.add('hidden');
-            } else {
-                container.innerHTML = cart.map(item => `
-                    <div class="bg-white border border-purple-50 p-4 rounded-2xl shadow-sm animate-fade-in-up">
-                        <div class="flex gap-4 items-start mb-3">
-                            <img src="${item.image}" class="w-16 h-16 rounded-xl object-cover">
-                            <div class="flex-1">
-                                <div class="flex justify-between">
-                                    <h4 class="font-bold text-[#581c87] text-sm leading-tight">${item.name}</h4>
-                                    <button onclick="removeFromCart('${item.id}')" class="text-slate-300 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                                </div>
-                                ${item.details ? `<div class="bg-purple-50/50 p-2 rounded-lg my-2 text-xs text-slate-600 whitespace-pre-line">${item.details}</div>` : ''}
-                                <div class="flex justify-between items-center mt-2">
-                                    <p class="text-[#db2777] font-bold text-sm">${formatPrice(item.price)}</p>
-                                    <div class="flex items-center gap-3">
-                                        <button onclick="updateQuantity('${item.id}', -1)" class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-600"><i data-lucide="minus" class="w-3 h-3"></i></button>
-                                        <span class="font-bold text-slate-700 text-sm">${item.quantity}</span>
-                                        <button onclick="updateQuantity('${item.id}', 1)" class="w-6 h-6 rounded-full bg-[#581c87] text-white flex items-center justify-center"><i data-lucide="plus" class="w-3 h-3"></i></button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="relative mt-2 border-t border-dashed border-purple-100 pt-2">
-                             <div class="flex items-center gap-2 mb-1">
-                                 <i data-lucide="edit-2" class="w-3 h-3 text-slate-400"></i>
-                                 <span class="text-xs font-bold text-slate-500">Observação?</span>
-                             </div>
-                             <textarea oninput="updateNote('${item.id}', this.value)" class="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-2 focus:outline-none focus:border-[#db2777] resize-none h-12" placeholder="Ex: Tirar granola...">${item.customerNote || ''}</textarea>
-                        </div>
-                    </div>
-                `).join('');
-                footer.classList.remove('hidden');
-            }
-
-            // Total
-            const totalVal = cart.reduce((acc, i) => acc + (i.price * i.quantity), 0);
-            totalEl.innerText = formatPrice(totalVal);
-            lucide.createIcons();
-        }
-
-        // --- CHECKOUT WHATSAPP (NO EMOJIS) ---
-        function checkoutWhatsApp() {
-            const name = document.getElementById('cust-name').value;
-            const phone = document.getElementById('cust-phone').value;
-            const address = document.getElementById('cust-address').value;
-            const payment = document.getElementById('cust-payment').value;
-
-            if (!name || !phone || !address) {
-                alert("Por favor, preencha os dados de entrega.");
-                return;
-            }
-
-            const total = cart.reduce((acc, i) => acc + (i.price * i.quantity), 0);
-            
-            // STRICTLY NO EMOJIS
-            let msg = `*NOVO PEDIDO CHEGANDO!*\n`;
-            msg += `--------------------------------\n\n`;
-            msg += `*ITENS DO PEDIDO:*\n`;
-            
-            cart.forEach((item, idx) => {
-                msg += `\n*${idx + 1}. ${item.quantity}x ${item.name}*\n`;
-                msg += `   Valor: ${formatPrice(item.price * item.quantity)}\n`;
-                if(item.details) {
-                    msg += `   Detalhes:\n   > ${item.details.replace(/\n/g, '\n   > ')}\n`;
-                }
-                if(item.customerNote) {
-                    msg += `   Obs do item: ${item.customerNote}\n`;
-                }
-            });
-
-            msg += `\n--------------------------------\n`;
-            msg += `*TOTAL DO PEDIDO:* ${formatPrice(total)}\n`;
-            msg += `*Pagamento:* ${payment}\n`;
-            msg += `--------------------------------\n\n`;
-            msg += `*DADOS PARA ENTREGA:*\n`;
-            msg += `*Nome:* ${name}\n`;
-            msg += `*Telefone:* ${phone}\n`;
-            msg += `*Endereço:* ${address}\n`;
-
-            window.open(`https://wa.me/5531990795020?text=${encodeURIComponent(msg)}`, '_blank');
-        }
-
-        // --- CUSTOMIZATION MODAL ---
         const sizes = [
             { label: '300ml', price: 15.00 }, { label: '500ml', price: 20.00 },
             { label: '700ml', price: 25.00 }, { label: '1 Litro', price: 35.00 }
         ];
-        const iceCreamFlavors = ['Morango', 'Chocolate', 'Flocos', 'Trufa', 'Doce de Leite'];
-        const toppingsAcai = ['Banana', 'Morango', 'Leite em pó', 'Nutella', 'Leite Cond.', 'Granola', 'Paçoca'];
-        const toppingsSorvete = ['Calda Choc', 'Calda Morango', 'Farofa', 'Jujuba', 'Leite Cond.'];
 
-        function openProductModal(itemId) {
-            // Find product in 'monte-seu-jeito' category
-            const category = menuCategories.find(c => c.id === 'monte-seu-jeito');
-            currentModalProduct = category.items.find(i => i.id === itemId);
-            
-            // Reset state
-            customization = { size: '500ml', flavor: '', toppings: [], obs: '' };
-            
-            // Populate Modal UI
-            document.getElementById('product-modal').classList.remove('hidden-section');
-            document.getElementById('modal-title').innerText = currentModalProduct.name;
-            document.getElementById('modal-img').src = currentModalProduct.image;
-            document.getElementById('modal-obs').value = '';
+        const iceCreamFlavors = ['Morango', 'Chocolate', 'Flocos', 'Trufa', 'Doce de Leite', 'Pistache', 'Ninho'];
+        const toppingsAcai = ['Banana', 'Morango', 'Leite em pó', 'Nutella', 'Leite Cond.', 'Granola', 'Paçoca', 'Kiwi', 'Mel'];
+        const toppingsSorvete = ['Calda Choc', 'Calda Morango', 'Farofa', 'Jujuba', 'Leite Cond.', 'Marshmallow'];
 
-            renderModalOptions();
-        }
-
-        function closeProductModal() {
-            document.getElementById('product-modal').classList.add('hidden-section');
-        }
-
-        function renderModalOptions() {
-            // Sizes
-            const sizeContainer = document.getElementById('size-options');
-            sizeContainer.innerHTML = sizes.map(s => `
-                <button onclick="selectSize('${s.label}')" class="border-2 rounded-xl p-3 flex flex-col items-center justify-center transition-all ${customization.size === s.label ? 'border-[#581c87] bg-[#581c87]/5 text-[#581c87]' : 'border-slate-100 text-slate-500'}">
-                    <span class="font-bold">${s.label}</span><span class="text-sm">R$ ${s.price.toFixed(2).replace('.',',')}</span>
-                </button>
-            `).join('');
-
-            // Flavors (If Sorvete)
-            const flavSection = document.getElementById('flavor-section');
-            if (currentModalProduct.type === 'sorvete') {
-                flavSection.classList.remove('hidden-section');
-                const flavContainer = document.getElementById('flavor-options');
-                flavContainer.innerHTML = iceCreamFlavors.map(f => `
-                    <button onclick="selectFlavor('${f}')" class="text-left px-4 py-3 rounded-xl border transition-all ${customization.flavor === f ? 'bg-[#db2777] border-[#db2777] text-white' : 'bg-white border-slate-200 text-slate-600'}">
-                        ${f}
-                    </button>
-                `).join('');
-            } else {
-                flavSection.classList.add('hidden-section');
-            }
-
-            // Toppings
-            const topsList = currentModalProduct.type === 'sorvete' ? toppingsSorvete : toppingsAcai;
-            const topsContainer = document.getElementById('topping-options');
-            topsContainer.innerHTML = topsList.map(t => {
-                const isSel = customization.toppings.includes(t);
-                return `
-                <button onclick="toggleTopping('${t}')" class="text-left px-4 py-3 rounded-xl border transition-all flex justify-between ${isSel ? 'bg-[#581c87] border-[#581c87] text-white' : 'bg-white border-slate-200 text-slate-600'}">
-                    <span class="text-sm">${t}</span>${isSel ? '<i data-lucide="check" class="w-4 h-4"></i>' : '<i data-lucide="plus" class="w-4 h-4"></i>'}
-                </button>`;
-            }).join('');
-            
-            updateModalTotal();
-            lucide.createIcons();
-        }
-
-        function selectSize(s) { customization.size = s; renderModalOptions(); }
-        function selectFlavor(f) { customization.flavor = f; renderModalOptions(); }
-        function toggleTopping(t) {
-            if (customization.toppings.includes(t)) customization.toppings = customization.toppings.filter(i => i !== t);
-            else customization.toppings.push(t);
-            renderModalOptions();
-        }
-
-        function updateModalTotal() {
-            const sizeObj = sizes.find(s => s.label === customization.size);
-            const basePrice = sizeObj ? sizeObj.price : 0;
-            const extras = Math.max(0, customization.toppings.length - 3) * 4.50;
-            document.getElementById('modal-total').innerText = formatPrice(basePrice + extras);
-        }
-
-        function confirmCustomization() {
-            if (!customization.size) return;
-            if (currentModalProduct.type === 'sorvete' && !customization.flavor) { alert('Escolha um sabor'); return; }
-
-            const sizeObj = sizes.find(s => s.label === customization.size);
-            const basePrice = sizeObj.price;
-            const extras = Math.max(0, customization.toppings.length - 3) * 4.50;
-            
-            customization.obs = document.getElementById('modal-obs').value;
-
-            const details = [
-                `Tamanho: ${customization.size}`,
-                currentModalProduct.type === 'sorvete' ? `Sabor: ${customization.flavor}` : '',
-                customization.toppings.length ? `Complementos: ${customization.toppings.join(', ')}` : '',
-                customization.obs ? `Obs: ${customization.obs}` : ''
-            ].filter(Boolean).join('\n');
-
-            addToCartCustom({
-                name: currentModalProduct.name,
-                price: basePrice + extras,
-                image: currentModalProduct.image,
-                details: details
-            });
-            closeProductModal();
-        }
-
-        // --- ABOUT MODAL ---
-        function openAboutModal() { document.getElementById('about-modal').classList.remove('hidden-section'); }
-        function closeAboutModal() { document.getElementById('about-modal').classList.add('hidden-section'); }
-
-        // --- INIT ---
-        window.onload = function() {
-            lucide.createIcons();
-            // Header Scroll Effect
-            window.addEventListener('scroll', () => {
-                const header = document.getElementById('header-container');
-                const wrapper = document.getElementById('main-header');
-                if (window.scrollY > 20) {
-                    header.classList.add('bg-white/90', 'shadow-lg');
-                    wrapper.classList.remove('pt-6');
-                    wrapper.classList.add('pt-2');
-                } else {
-                    header.classList.remove('bg-white/90', 'shadow-lg');
-                    wrapper.classList.add('pt-6');
-                    wrapper.classList.remove('pt-2');
-                }
-            });
-            // Search Enter Key
-            document.getElementById('desktop-search').addEventListener('keypress', (e) => {
-                if(e.key === 'Enter') {
-                    document.getElementById('menu-search').value = e.target.value;
-                    navigateTo('menu');
-                }
-            });
+        // --- STATE & UTILS ---
+        const state = {
+            cart: [],
+            view: 'home',
+            searchFilter: ''
         };
+
+        const formatPrice = (val) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+        // --- ROUTER ---
+        const router = {
+            navigate: (view) => {
+                state.view = view;
+                const homeView = document.getElementById('home-view');
+                const menuView = document.getElementById('menu-view');
+                const navBtns = document.querySelectorAll('.nav-btn');
+                const searchInput = document.getElementById('desktop-search');
+
+                if (view === 'home') {
+                    homeView.classList.remove('hidden');
+                    menuView.classList.add('hidden');
+                    searchInput.placeholder = "Buscar...";
+                } else {
+                    homeView.classList.add('hidden');
+                    menuView.classList.remove('hidden');
+                    searchInput.placeholder = "Filtrar sabores...";
+                    app.renderMenu();
+                }
+                
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                navBtns.forEach(btn => {
+                    if (btn.dataset.target === view) {
+                        btn.className = "nav-btn px-4 py-2 rounded-full text-sm font-bold transition-all text-[#581c87] bg-[#db2777]/10";
+                    } else {
+                        btn.className = "nav-btn px-4 py-2 rounded-full text-sm font-bold transition-all text-[#581c87]/80 hover:text-[#581c87]";
+                    }
+                });
+            },
+            scrollTo: (id) => {
+                router.navigate('home');
+                setTimeout(() => {
+                    const el = document.getElementById(id);
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+            }
+        };
+
+        // --- APP LOGIC ---
+        const app = {
+            init: () => {
+                lucide.createIcons();
+                app.renderMenu();
+                
+                // Scroll Header Effect
+                window.addEventListener('scroll', () => {
+                    const header = document.getElementById('main-header');
+                    const container = document.getElementById('header-container');
+                    if (window.scrollY > 20) {
+                        header.classList.remove('pt-6');
+                        header.classList.add('pt-2');
+                        container.classList.add('bg-white/90', 'shadow-lg');
+                        container.classList.remove('bg-white/70');
+                    } else {
+                        header.classList.add('pt-6');
+                        header.classList.remove('pt-2');
+                        container.classList.remove('bg-white/90', 'shadow-lg');
+                        container.classList.add('bg-white/70');
+                    }
+                });
+            },
+
+            handleSearch: (term) => {
+                state.searchFilter = term;
+                if (state.view === 'home' && term.length > 0) {
+                    router.navigate('menu');
+                }
+                app.renderMenu();
+            },
+
+            toggleMobileMenu: () => {
+                const menu = document.getElementById('mobile-menu');
+                menu.classList.toggle('translate-x-full');
+                menu.classList.toggle('translate-x-0');
+            },
+
+            renderMenu: () => {
+                const container = document.getElementById('menu-container');
+                const filter = state.searchFilter.toLowerCase();
+                
+                let html = '';
+                let hasItems = false;
+
+                menuCategories.forEach(cat => {
+                    const filteredItems = cat.items.filter(item => 
+                        item.name.toLowerCase().includes(filter) || 
+                        item.desc.toLowerCase().includes(filter)
+                    );
+
+                    if (filteredItems.length > 0) {
+                        hasItems = true;
+                        let catIcon = 'flame';
+                        if (cat.icon === 'edit-3') catIcon = 'edit-3';
+                        if (cat.icon === 'percent') catIcon = 'percent';
+                        if (cat.icon === 'snowflake') catIcon = 'snowflake';
+
+                        html += `
+                        <div>
+                            <div class="flex items-center gap-3 mb-6 border-b border-purple-200 pb-2">
+                                <div class="text-[#581c87]"><i data-lucide="${catIcon}"></i></div>
+                                <h2 class="text-2xl font-bold text-[#581c87]">${cat.title}</h2>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        `;
+
+                        filteredItems.forEach(item => {
+                            const btnAction = cat.isCustom 
+                                ? `modal.open('${item.id}')` 
+                                : `cart.add({id: '${item.id}', name: '${item.name}', desc: '${item.desc}', price: ${item.price}, image: '${item.image}', type: '${item.type}'})`;
+                            
+                            const btnIcon = cat.isCustom ? 'edit-3' : 'plus';
+                            const btnColor = cat.isCustom ? 'bg-orange-500' : 'bg-[#581c87]';
+                            const cardStyle = cat.isCustom ? 'bg-orange-50 border-orange-100' : '';
+
+                            html += `
+                                <div class="bg-white p-4 rounded-3xl shadow-sm hover:shadow-lg transition-all border border-purple-50 flex gap-4 items-center ${cardStyle}">
+                                    <img src="${item.image}" alt="${item.name}" class="w-24 h-24 rounded-xl object-cover shrink-0" />
+                                    <div class="flex-1">
+                                        <h3 class="font-bold text-[#581c87] leading-tight mb-1">${item.name}</h3>
+                                        <p class="text-slate-500 text-xs mb-2 line-clamp-2">${item.desc}</p>
+                                        <div class="flex justify-between items-center mt-2">
+                                            <span class="font-black text-[#db2777]">
+                                                ${item.price > 0 ? formatPrice(item.price) : 'A partir R$ 15'}
+                                            </span>
+                                            <button onclick="${btnAction}" class="w-8 h-8 rounded-full ${btnColor} text-white flex items-center justify-center hover:scale-105 transition-transform">
+                                                <i data-lucide="${btnIcon}" class="w-4 h-4"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+
+                        html += `</div></div>`;
+                    }
+                });
+
+                if (!hasItems) {
+                    html = `<div class="text-center py-20 opacity-60"><p>Nenhum item encontrado.</p></div>`;
+                }
+
+                container.innerHTML = html;
+                lucide.createIcons();
+            }
+        };
+
+        // --- CART ---
+        const cart = {
+            isOpen: false,
+            toggle: () => {
+                cart.isOpen = !cart.isOpen;
+                const drawer = document.getElementById('cart-drawer');
+                const backdrop = document.getElementById('cart-drawer-backdrop');
+                
+                if (cart.isOpen) {
+                    drawer.classList.remove('translate-x-full');
+                    drawer.classList.add('translate-x-0');
+                    backdrop.classList.remove('opacity-0', 'pointer-events-none');
+                    backdrop.classList.add('opacity-100');
+                    document.body.classList.add('overflow-hidden');
+                } else {
+                    drawer.classList.add('translate-x-full');
+                    drawer.classList.remove('translate-x-0');
+                    backdrop.classList.add('opacity-0', 'pointer-events-none');
+                    backdrop.classList.remove('opacity-100');
+                    document.body.classList.remove('overflow-hidden');
+                }
+            },
+            add: (newItem) => {
+                const existingIndex = state.cart.findIndex(i => i.id === newItem.id && i.details === (newItem.details || ''));
+                if (existingIndex >= 0) {
+                    state.cart[existingIndex].quantity += 1;
+                } else {
+                    state.cart.push({ 
+                        ...newItem, 
+                        cartId: Date.now().toString() + Math.random(), 
+                        quantity: 1,
+                        details: newItem.details || '',
+                        customerNote: ''
+                    });
+                }
+                cart.render();
+                if(!cart.isOpen) cart.toggle();
+            },
+            remove: (id) => {
+                state.cart = state.cart.filter(item => item.cartId !== id);
+                cart.render();
+            },
+            updateQty: (id, delta) => {
+                state.cart = state.cart.map(item => {
+                    if (item.cartId === id) return { ...item, quantity: item.quantity + delta };
+                    return item;
+                }).filter(item => item.quantity > 0);
+                cart.render();
+            },
+            updateNote: (id, val) => {
+                const item = state.cart.find(i => i.cartId === id);
+                if(item) item.customerNote = val;
+            },
+            render: () => {
+                const container = document.getElementById('cart-items');
+                const badge = document.getElementById('cart-badge');
+                const footer = document.getElementById('cart-footer');
+                const totalEl = document.getElementById('cart-total');
+
+                const totalQty = state.cart.reduce((acc, i) => acc + i.quantity, 0);
+                const totalPrice = state.cart.reduce((acc, i) => acc + (i.price * i.quantity), 0);
+
+                if (totalQty > 0) {
+                    badge.textContent = totalQty;
+                    badge.classList.remove('hidden');
+                    footer.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                    footer.classList.add('hidden');
+                }
+
+                totalEl.textContent = formatPrice(totalPrice);
+
+                if (state.cart.length === 0) {
+                    container.innerHTML = `
+                        <div class="h-full flex flex-col items-center justify-center text-center opacity-60">
+                            <i data-lucide="shopping-bag" class="w-12 h-12 text-slate-400 mb-4"></i>
+                            <h3 class="text-xl font-bold text-slate-700">Carrinho vazio</h3>
+                            <p class="text-slate-500">Adicione itens para começar.</p>
+                        </div>`;
+                } else {
+                    container.innerHTML = state.cart.map(item => `
+                        <div class="bg-white border border-purple-50 p-4 rounded-2xl shadow-sm">
+                            <div class="flex gap-4 items-start mb-3">
+                                <img src="${item.image}" class="w-16 h-16 rounded-xl object-cover" />
+                                <div class="flex-1">
+                                    <div class="flex justify-between">
+                                        <h4 class="font-bold text-[#581c87] text-sm leading-tight">${item.name}</h4>
+                                        <button onclick="cart.remove('${item.cartId}')" class="text-slate-300 hover:text-red-500">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                    ${item.details ? `<div class="bg-purple-50/50 p-2 rounded-lg my-2 text-xs text-slate-600 whitespace-pre-line">${item.details}</div>` : ''}
+                                    <div class="flex justify-between items-center mt-2">
+                                        <p class="text-[#db2777] font-bold text-sm">${formatPrice(item.price)}</p>
+                                        <div class="flex items-center gap-3">
+                                            <button onclick="cart.updateQty('${item.cartId}', -1)" class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-600"><i data-lucide="minus" class="w-3 h-3"></i></button>
+                                            <span class="font-bold text-slate-700 text-sm">${item.quantity}</span>
+                                            <button onclick="cart.updateQty('${item.cartId}', 1)" class="w-6 h-6 rounded-full bg-[#581c87] text-white flex items-center justify-center"><i data-lucide="plus" class="w-3 h-3"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="relative mt-2 border-t border-dashed border-purple-100 pt-2">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <i data-lucide="edit-2" class="w-3 h-3 text-slate-400"></i>
+                                    <span class="text-xs font-bold text-slate-500">Observação?</span>
+                                </div>
+                                <textarea oninput="cart.updateNote('${item.cartId}', this.value)" class="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-2 focus:outline-none focus:border-[#db2777] resize-none h-12" placeholder="Ex: Tirar granola...">${item.customerNote || ''}</textarea>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+                lucide.createIcons();
+            },
+            checkout: () => {
+                const name = document.getElementById('cust-name').value;
+                const phone = document.getElementById('cust-phone').value;
+                const address = document.getElementById('cust-address').value;
+                const payment = document.getElementById('cust-payment').value;
+
+                if (!name || !phone || !address) {
+                    alert("Por favor, preencha os dados de entrega.");
+                    return;
+                }
+
+                let msg = `*NOVO PEDIDO CHEGANDO!*\n--------------------------------\n\n*ITENS DO PEDIDO:*\n`;
+                state.cart.forEach((item, idx) => {
+                    msg += `\n*${idx + 1}. ${item.quantity}x ${item.name}*\n   Valor: ${formatPrice(item.price * item.quantity)}\n`;
+                    if(item.details) msg += `   Detalhes:\n   > ${item.details.replace(/\n/g, '\n   > ')}\n`;
+                    if(item.customerNote) msg += `   Obs: ${item.customerNote}\n`;
+                });
+
+                const total = state.cart.reduce((acc, i) => acc + (i.price * i.quantity), 0);
+                msg += `\n--------------------------------\n*TOTAL: ${formatPrice(total)}*\n*Pagamento:* ${payment}\n--------------------------------\n\n*ENTREGA:*\n*Nome:* ${name}\n*Tel:* ${phone}\n*Endereço:* ${address}\n`;
+
+                window.open(`https://wa.me/5531990795020?text=${encodeURIComponent(msg)}`, '_blank');
+            }
+        };
+
+        // --- MODAL ---
+        let currentModalProduct = null;
+        let modalState = { size: '', flavor: '', toppings: [], obs: '' };
+
+        const modal = {
+            open: (productId) => {
+                // Find product (search in all categories)
+                let product = null;
+                for(const cat of menuCategories) {
+                    const found = cat.items.find(i => i.id === productId);
+                    if(found) { product = found; break; }
+                }
+                
+                if (!product) return;
+                currentModalProduct = product;
+                modalState = { size: '500ml', flavor: '', toppings: [], obs: '' };
+
+                const modalEl = document.getElementById('product-modal');
+                const backdrop = document.getElementById('product-modal-backdrop');
+                const content = document.getElementById('product-modal-content');
+
+                modalEl.classList.remove('pointer-events-none', 'opacity-0');
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+                backdrop.classList.remove('hidden');
+
+                modal.renderContent();
+            },
+            close: () => {
+                const modalEl = document.getElementById('product-modal');
+                const backdrop = document.getElementById('product-modal-backdrop');
+                const content = document.getElementById('product-modal-content');
+
+                modalEl.classList.add('pointer-events-none', 'opacity-0');
+                content.classList.add('scale-95');
+                content.classList.remove('scale-100');
+                backdrop.classList.add('hidden');
+                currentModalProduct = null;
+            },
+            toggleSize: (s) => { modalState.size = s; modal.renderContent(); },
+            toggleFlavor: (f) => { modalState.flavor = f; modal.renderContent(); },
+            toggleTopping: (t) => {
+                if(modalState.toppings.includes(t)) modalState.toppings = modalState.toppings.filter(i => i !== t);
+                else modalState.toppings.push(t);
+                modal.renderContent();
+            },
+            updateObs: (val) => { modalState.obs = val; },
+            calcTotal: () => {
+                const sizeObj = sizes.find(s => s.label === modalState.size);
+                const basePrice = sizeObj ? sizeObj.price : 0;
+                const extras = Math.max(0, modalState.toppings.length - 3) * 4.50;
+                return basePrice + extras;
+            },
+            confirm: () => {
+                if(currentModalProduct.type === 'sorvete' && !modalState.flavor) {
+                    alert('Escolha um sabor'); return;
+                }
+                const details = [
+                    `Tamanho: ${modalState.size}`,
+                    currentModalProduct.type === 'sorvete' ? `Sabor: ${modalState.flavor}` : '',
+                    modalState.toppings.length ? `Complementos: ${modalState.toppings.join(', ')}` : '',
+                    modalState.obs ? `Obs: ${modalState.obs}` : ''
+                ].filter(Boolean).join('\n');
+
+                cart.add({
+                    id: currentModalProduct.id,
+                    name: currentModalProduct.name,
+                    desc: currentModalProduct.desc,
+                    price: modal.calcTotal(),
+                    image: currentModalProduct.image,
+                    details: details,
+                    type: currentModalProduct.type
+                });
+                modal.close();
+            },
+            renderContent: () => {
+                const content = document.getElementById('product-modal-content');
+                const product = currentModalProduct;
+                const toppingsList = product.type === 'sorvete' ? toppingsSorvete : toppingsAcai;
+
+                let html = `
+                    <div class="relative h-40 shrink-0">
+                        <img src="${product.image}" class="w-full h-full object-cover" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-6">
+                            <h2 class="text-3xl font-black text-white">${product.name}</h2>
+                        </div>
+                        <button onclick="modal.close()" class="absolute top-4 right-4 bg-white/20 text-white p-2 rounded-full hover:bg-white hover:text-red-500 transition-colors">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    <div class="overflow-y-auto p-6 space-y-6 custom-scrollbar">
+                        <div>
+                            <h3 class="font-bold text-[#581c87] mb-3">1. Escolha o Tamanho</h3>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                ${sizes.map(s => `
+                                    <button onclick="modal.toggleSize('${s.label}')" class="border-2 rounded-xl p-3 flex flex-col items-center justify-center transition-all ${modalState.size === s.label ? 'border-[#581c87] bg-[#581c87]/5 text-[#581c87]' : 'border-slate-100 text-slate-500'}">
+                                        <span class="font-bold">${s.label}</span>
+                                        <span class="text-sm">R$ ${s.price.toFixed(2).replace('.',',')}</span>
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                        ${product.type === 'sorvete' ? `
+                            <div>
+                                <h3 class="font-bold text-[#581c87] mb-3">2. Escolha o Sabor</h3>
+                                <div class="grid grid-cols-2 gap-3">
+                                    ${iceCreamFlavors.map(f => `
+                                        <button onclick="modal.toggleFlavor('${f}')" class="text-left px-4 py-3 rounded-xl border transition-all ${modalState.flavor === f ? 'bg-[#db2777] border-[#db2777] text-white' : 'bg-white border-slate-200 text-slate-600'}">${f}</button>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        <div>
+                            <div class="flex justify-between items-end mb-3">
+                                <h3 class="font-bold text-[#581c87]">Complementos</h3>
+                                <span class="text-xs font-bold text-orange-500">3 Grátis (+ R$ 4,50 extra)</span>
+                            </div>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                ${toppingsList.map(t => {
+                                    const isSel = modalState.toppings.includes(t);
+                                    return `
+                                    <button onclick="modal.toggleTopping('${t}')" class="text-left px-4 py-3 rounded-xl border transition-all flex justify-between ${isSel ? 'bg-[#581c87] border-[#581c87] text-white' : 'bg-white border-slate-200 text-slate-600'}">
+                                        <span class="text-sm">${t}</span>
+                                        <i data-lucide="${isSel ? 'check' : 'plus'}" class="w-4 h-4"></i>
+                                    </button>`;
+                                }).join('')}
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-[#581c87] mb-3">Observações</h3>
+                            <textarea oninput="modal.updateObs(this.value)" class="w-full border border-slate-300 rounded-xl p-3 h-20 resize-none focus:ring-2 focus:ring-[#db2777] outline-none" placeholder="Ex: Sem calda...">${modalState.obs}</textarea>
+                        </div>
+                    </div>
+                    <div class="p-6 border-t border-slate-100 bg-[#faf5ff] flex items-center justify-between shrink-0">
+                        <div class="flex flex-col">
+                            <span class="text-slate-500 text-sm">Total</span>
+                            <span class="text-2xl font-black text-[#581c87]">${formatPrice(modal.calcTotal())}</span>
+                        </div>
+                        <button onclick="modal.confirm()" class="px-8 py-3 rounded-full font-bold text-white bg-[#db2777] hover:bg-[#be185d] flex items-center gap-2 shadow-lg transition-all">
+                            Adicionar <i data-lucide="plus" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                `;
+                content.innerHTML = html;
+                lucide.createIcons();
+            }
+        };
+
+        // Init App
+        document.addEventListener('DOMContentLoaded', app.init);
+
     </script>
 </body>
 </html>
